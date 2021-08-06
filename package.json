@@ -1,0 +1,12 @@
+{
+  "name": "speaker-prediction-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "sass src/styles.sass:src/styles.css --watch"
+  },
+  "author": "",
+  "license": "ISC"
+}

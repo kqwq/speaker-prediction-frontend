@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  
+    <!-- Font awesome -->
+    <script src="https://kit.fontawesome.com/aa703787a4.js" crossorigin="anonymous"></script>
+
+    <!-- jQuery first, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="./scripts.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./styles.css">
+    <style>
+      .nodelabel {
+        font-family: futura-pt;
+        font-size: small;
+      }
+
+  </style>
+  </head>
+  <body>
+    <div class="jumbotron text-center">
+      <h1 class="display-4">Speaker Prediction</h1>
+      <p class="lead">Grace Life Community Church</p>
+      <hr>
+      <!--p> - <a target="_blank" href="https://www.gracelifecc.org/">Website</a> - <a target="_blank" 
+        
+        href="https://www.gracelifecc.org/WatchNow">Data source</a></p-->
+      <div class="lead mt-3">
+
+        <div id="before-show">
+          <button class="btn btn-primary btn-lg" href="#" role="button" onclick="showPrediction()">Show prediction</button>
+          <br>
+          <b>for <span class="prediction-date">Loading...</span></b>
+        </div>
+        <div id="after-show" style="display: none;">
+          <h1><span class="final-prediction-speaker">Loading...</span> will preach on Sunday, <span class="prediction-date"></span>*</h1>
+          <small>*Results may vary</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-8">
+          <div>
+
+            <div class="form-check form-check-inline">
+              <h2>Sermons</h2>
+              <label class="form-check-label ml-5">
+                <input type="checkbox" class="form-check-input" name="Legend" id="checkbox-legend" value="checkedValue" onclick="checkLegend(this.checked)">
+                Legend
+              </label>
+              <label class="form-check-label ml-3">
+                <input type="checkbox" class="form-check-input" name="Years" id="checkbox-years" value="checkedValue" onclick="checkYears(this.checked)">
+                Years
+              </label>
+              <label class="form-check-label ml-3">
+                <input type="checkbox" class="form-check-input" name="Guest speakers" id="checkbox-guests" value="checkedValue" onclick="checkGuestSpeakers(this.checked)" checked>
+                Guest speakers
+              </label>
+            </div>
+
+
+            <div id="legend-container" style='display: none;'>
+            </div>
+          </div>
+          <div id="circles" class="mt-4 grid"></div>
+        </div>
+        
+        <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+          <div class="card" id="speaker-card">
+            <div class="card-body">
+              <!-- Image of speaker -->
+              <img class="card-img-top" id='speaker-img' src="https://faithconnector.s3.amazonaws.com/gracelifecc/images/member/eldermattcaudle.jpg" alt="Card image cap">
+              
+              <h2 class="card-title" id='speaker-name'>name</h2>
+              <p class="card-text">
+                <b>GAVE A SERMON TITLED</b>
+                <h4 id='sermon-title'>title</h4>
+                <i id='sermon-date'>date</i>
+                <a style='float:right' id='sermon-link' target="_blank" href="#">Permalink</a>
+              </p>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12 mt-5">
+          <p>
+            <b>Speaker Prediction</b> uses the <a href="https://www.gracelifecc.org/">Grace Life Community Church</a> sermon list to make predictions.
+With bit of data, applied math and probability, this website can predict who will give the sermon next Sunday.
+            <br>
+            <br>
+          </p>
+
+          <h3>Data</h3>
+          <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">Note</h4>
+            <p class="mb-0">The following content is dynamic and updates every week.</p>
+          </div>
+          <p>Sermon leaderboard by speaker (not incuding sermons with multiple speakers or video presentations).</p>
+          <table class="table">
+            <thead>
+              <tr id="table-firstrow">
+                <th>Rank</th>
+                <th>Speaker</th>
+                <th>Sermon count</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+            </tbody>
+          </table>
+
+          <h3>Rotation</h3>
+          <p>Speakers at GLCC are likely to rotate and take turns preaching every Sunday.
+             Since there are four main speakers, the rotation repeats every four Sundays (ignoring guest speakers), which follows this sequence:</p>
+          
+          <div id="last-cycle">
+            <span class="badge badge-primary">Speaker 1</span>
+            <i class="fas fa-arrow-right"></i>
+            <span class="badge badge-light">Speaker 2</span>
+            <i class="fas fa-arrow-right"></i>
+            <span class="badge badge-light">Speaker 3</span>
+            <i class="fas fa-arrow-right"></i>
+            <span class="badge badge-light">Speaker 4</span>
+            <i class="fas fa-arrow-right"></i>
+            <span class="badge badge-success">Speaker 1 (prediction)</span>
+          </div>
+          <p class="mt-3">There are multiple ways of calculting this, but this method selects the main pastor who has preached the longest time ago.
+Guest speakers are ignored and not considered part of the rotation. 
+This is a good starting point.</p>
+With this theory, <b class='speaker-rotation-1'>speakerRotation[0]</b> will most likely preach on <span class='prediction-date'>[nextWeekDate]</span>,
+followed by <b class='speaker-rotation-2'></b> and <b class='speaker-rotation-3'></b> on <span class='prediction-date-2'>date2</span> and <span class='prediction-date-3'>date3</span>, respectively. 
+</p>
+
+          
+    
+            <div id='markov-section' class="row">
+              <div id='markov-content' class="col-sm-12 col-md-6">
+                <h3>Markov Chain</h3>
+                <p>A better and more math-based approach to this problem uses a <a target="_blank" href="https://en.wikipedia.org/wiki/Markov_chain">Markov Chain</a> to predict the next speaker. 
+                This takes in account the previous speaker and weighs each possible outcome based on past outcomes.
+                This is a more accurate method because it takes in account speakers who preach multiple sermons in a row. It can also measure if a given speaker has a "hand-off" preference, i.e. speaker that will likely follow.</p>
+                <p>Since guest speakers are relatively rare, we can exclude them from the dataset. 
+                  The graph on the right shows the Markov chain with guest speakers, and the dropdown box below shows the Markov chain without guest speakrs.
+                  Technically the graph on the right is useless, but it's a good way to visualize this concept.</p>
+                </p>
+
+                  
+                 <div class="dropdown">
+                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdown-id" data-toggle="dropdown" aria-haspopup="true"
+                       aria-expanded="false">
+                         <b class="speaker-rotation-4" id="dropdown-title"></b>
+                       </button>
+                   <div class="dropdown-menu" aria-labelledby="dropdown-id">
+                     <button class="dropdown-item primary" href="#"><span class="speaker-rotation-1"></span></button>
+                     <button class="dropdown-item" href="#"><span class="speaker-rotation-2"></span></button>
+                     <button class="dropdown-item" href="#"><span class="speaker-rotation-3"></span></button>
+                     <button class="dropdown-item" href="#"><span class="speaker-rotation-4"></span></button>
+                   </div>
+                 </div>
+
+                 <h4 class="mt-4" id="mcb-prediction">Prediction after <span class='mcb-speaker-origin'></span></h4>
+                 
+                 <h5><span class="mcb-speaker-1"></span> - <span class="mcb-chance-1"></span></h5>
+                 <h5><span class="mcb-speaker-2"></span> - <span class="mcb-chance-2"></span></h5>
+                 <h5><span class="mcb-speaker-3"></span> - <span class="mcb-chance-3"></span></h5>
+                 <h5><span class="mcb-speaker-4"></span> - <span class="mcb-chance-4"></span></h5>
+
+              </div>
+              <div id="markov-container" class="col-sm-12 col-md-6"></div>
+            </div>
+       
+          
+            
+          
+
+         
+          
+
+          <h3>Final prediction...?</h3>
+          <p>Realistically we can't predict who will give the sermon on Sunday with good accuracy because there is unsufficient data.
+             <!--However, it was a fun project to build.-->
+             This project wouldn't be any fun with no results, so here is a somewhat decent prediction formula:
+             
+            <pre>score = Markov_Chain_Weight + (Weeks_Since_Last_Sermon) / 4</pre>
+            <p>The speaker with the highest prediction score is <span class="final-prediction-speaker">Loading...</span>.</p>
+            </p>
+
+          
+             <i>View <a href="#" target="_blank">this project</a> on GitHub.</i>
+
+
+          
+
+
+      </div>
+    </div>
+  </div>
+
+
+  <br>
+  </div>
+      <!-- Footer -->
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <h4 class="text-center">
+              <!-- Github, Twitter, LinkedIn -->
+              <span>Follow me</span>
+              <a href="https://github.com/GitHubium" target="_blank"><i class="fab fa-github"></i></a>
+              <a href="https://twitter.com/epicoKyle" target="_blank"><i class="fab fa-twitter"></i></a>
+              <a href="https://www.linkedin.com/in/kqwq/" target="_blank"><i class="fab fa-linkedin"></i></a>
+            
+              <!-- Discord >
+              <span>Join the conversation</span>
+              <a href="https://discord.gg/M6eCAFH" target="_blank"><i class="fab fa-discord"></i></a-->
+                <!-- Imagine looking through the code and finding the invite link -->
+
+              <!-- Email -->
+              <span>Contact</span>
+              <a href="mailto:kylew864@gmail.com" target="_blank"><i class="fa fa-envelope"></i></a>
+              
+            </h4>
+          </div>
+        </div>
+      </div>
+
+  </body>
+  <script src="./graphMarkov.js"></script>
+  
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://use.typekit.net/tft4kzv.css">
+  <meta charset="utf-8">
+<title>Markov Chain Visualization - D3.js</title>
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <h3>Yellow | <span id = "artist">Coldplay</span></h3>
+    <div id = "container"></div>
+</body>
+</html>
+
+<style>
+    .nodelabel {
+      font-family: futura-pt;
+      font-size: small;
+    }
+
+    h3{
+        font-family: futura-pt;
+        text-align: center;
+    }
+
+    #artist {
+        font-weight: 300;
+    }
+
+    #container {
+        width: auto;
+        height: auto;
+    }
+
+</style>
+
+
+<script>
+
+// 16:9
+const w = 1280;
+const h = 720;
+
+const linkDistance=50;
+
+var colors = d3.scale.category20();
+
+// use the public github file instead of local file to get around Chrome blocking CORS/XMLHttp (without an extension)
+d3.json("https://raw.githubusercontent.com/sxnaan/markov/main/src/data.json", function (dataset) {
+    var svg = d3.select("#container").append("svg").attr({"width":w,"height":h});
+
+    var force = d3.layout.force()
+    .nodes(dataset.nodes)
+    .links(dataset.edges)
+    .size([w,h])
+    .linkDistance([linkDistance])
+    .charge([-500])
+    .theta(0.1)
+    .gravity(0.1)
+    .start();
+
+    var edges = svg.selectAll("line")
+    .data(dataset.edges)
+    .enter()
+    .append("line")
+    .attr('marker-end','url(#arrowhead)')
+    .style("stroke","#ccc")
+    .style("pointer-events", "none");
+
+    var edgepaths = svg.selectAll(".edgepath")
+    .data(dataset.edges)
+    .enter()
+    .append('path')
+    .attr({ 'd': d => 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y,
+            'class':'edgepath',
+            'fill-opacity':0,
+            'stroke-opacity':0.4,
+            'fill':'blue',
+            'stroke':'grey',
+            'stroke-width': d => String(d.weight*5).concat('px')})
+    .style("pointer-events", "none");
+
+    var nodes = svg.selectAll("circle")
+    .data(dataset.nodes)
+    .enter()
+    .append("circle")
+    .attr({"r":10})
+    .style("fill", (d,i) => colors(i))
+    .call(force.drag)
+
+    var nodelabels = svg.selectAll(".nodelabel") 
+    .data(dataset.nodes)
+    .enter()
+    .append("text")
+    .attr({"x":d => d.x,
+            "y":d => d.y,
+            "class":"nodelabel",
+            "stroke":"black",
+            "stroke-width":'.7px'})
+    .text(d => d.word);
+
+    svg.append('defs').append('marker')
+        .attr({'id':'arrowhead',
+            'viewBox':'-0 -5 10 10',
+            'refX':20,
+            'refY':0,
+            'orient':'auto',
+            'markerWidth':10,
+            'markerHeight':10,
+            'xoverflow':'visible'})
+        .append('svg:path')
+            .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
+            .attr('fill', '#ccc')
+            .attr('stroke','#ccc');
+
+        force.on("tick", function(){
+
+            edges.attr({"x1": d => d.source.x,
+                        "y1": d => d.source.y,
+                        "x2": d => d.target.x,
+                        "y2": d => d.target.y
+            });
+
+            nodes.attr({"cx": d => d.x,
+                        "cy": d => d.y
+            });
+
+            nodelabels.attr("x", d => d.x) 
+                      .attr("y", d => d.y);
+
+            edgepaths.attr('d', d => 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y);        
+        });
+
+});
+
+</script>
